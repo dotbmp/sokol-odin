@@ -1350,11 +1350,14 @@ SOKOL_DEBUG :: #config(SOKOL_DEBUG, ODIN_DEBUG)
 DEBUG :: #config(SOKOL_APP_DEBUG, SOKOL_DEBUG)
 USE_GL :: #config(SOKOL_USE_GL, false)
 USE_DLL :: #config(SOKOL_DLL, false)
-USE_VULKAN :: #config(SOKOL_USE_VULKAN, false)  // Linux only
+USE_VULKAN :: #config(SOKOL_USE_VULKAN, false)  // Linux + Windows
 
 when ODIN_OS == .Windows {
     when USE_DLL {
-        when USE_GL {
+        when USE_VULKAN {
+            when DEBUG { foreign import sokol_app_clib { "../sokol_dll_windows_x64_vulkan_debug.lib", "system:vulkan-1.lib" } }
+            else       { foreign import sokol_app_clib { "../sokol_dll_windows_x64_vulkan_release.lib", "system:vulkan-1.lib" } }
+        } else when USE_GL {
             when DEBUG { foreign import sokol_app_clib { "../sokol_dll_windows_x64_gl_debug.lib" } }
             else       { foreign import sokol_app_clib { "../sokol_dll_windows_x64_gl_release.lib" } }
         } else {
@@ -1362,7 +1365,10 @@ when ODIN_OS == .Windows {
             else       { foreign import sokol_app_clib { "../sokol_dll_windows_x64_d3d11_release.lib" } }
         }
     } else {
-        when USE_GL {
+        when USE_VULKAN {
+            when DEBUG { foreign import sokol_app_clib { "sokol_app_windows_x64_vulkan_debug.lib", "system:vulkan-1.lib" } }
+            else       { foreign import sokol_app_clib { "sokol_app_windows_x64_vulkan_release.lib", "system:vulkan-1.lib" } }
+        } else when USE_GL {
             when DEBUG { foreign import sokol_app_clib { "sokol_app_windows_x64_gl_debug.lib" } }
             else       { foreign import sokol_app_clib { "sokol_app_windows_x64_gl_release.lib" } }
         } else {
