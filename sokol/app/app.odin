@@ -1350,6 +1350,7 @@ SOKOL_DEBUG :: #config(SOKOL_DEBUG, ODIN_DEBUG)
 DEBUG :: #config(SOKOL_APP_DEBUG, SOKOL_DEBUG)
 USE_GL :: #config(SOKOL_USE_GL, false)
 USE_DLL :: #config(SOKOL_DLL, false)
+USE_VULKAN :: #config(SOKOL_USE_VULKAN, false)  // Linux only
 
 when ODIN_OS == .Windows {
     when USE_DLL {
@@ -1399,12 +1400,22 @@ when ODIN_OS == .Windows {
         }
     }
 } else when ODIN_OS == .Linux {
-    when USE_DLL {
-        when DEBUG { foreign import sokol_app_clib { "sokol_app_linux_x64_gl_debug.so", "system:X11", "system:Xi", "system:Xcursor", "system:GL", "system:dl", "system:pthread" } }
-        else       { foreign import sokol_app_clib { "sokol_app_linux_x64_gl_release.so", "system:X11", "system:Xi", "system:Xcursor", "system:GL", "system:dl", "system:pthread" } }
+    when USE_VULKAN {
+        when USE_DLL {
+            when DEBUG { foreign import sokol_app_clib { "sokol_app_linux_x64_vulkan_debug.so", "system:X11", "system:Xi", "system:Xcursor", "system:vulkan", "system:dl", "system:pthread" } }
+            else       { foreign import sokol_app_clib { "sokol_app_linux_x64_vulkan_release.so", "system:X11", "system:Xi", "system:Xcursor", "system:vulkan", "system:dl", "system:pthread" } }
+        } else {
+            when DEBUG { foreign import sokol_app_clib { "sokol_app_linux_x64_vulkan_debug.a", "system:X11", "system:Xi", "system:Xcursor", "system:vulkan", "system:dl", "system:pthread" } }
+            else       { foreign import sokol_app_clib { "sokol_app_linux_x64_vulkan_release.a", "system:X11", "system:Xi", "system:Xcursor", "system:vulkan", "system:dl", "system:pthread" } }
+        }
     } else {
-        when DEBUG { foreign import sokol_app_clib { "sokol_app_linux_x64_gl_debug.a", "system:X11", "system:Xi", "system:Xcursor", "system:GL", "system:dl", "system:pthread" } }
-        else       { foreign import sokol_app_clib { "sokol_app_linux_x64_gl_release.a", "system:X11", "system:Xi", "system:Xcursor", "system:GL", "system:dl", "system:pthread" } }
+        when USE_DLL {
+            when DEBUG { foreign import sokol_app_clib { "sokol_app_linux_x64_gl_debug.so", "system:X11", "system:Xi", "system:Xcursor", "system:GL", "system:dl", "system:pthread" } }
+            else       { foreign import sokol_app_clib { "sokol_app_linux_x64_gl_release.so", "system:X11", "system:Xi", "system:Xcursor", "system:GL", "system:dl", "system:pthread" } }
+        } else {
+            when DEBUG { foreign import sokol_app_clib { "sokol_app_linux_x64_gl_debug.a", "system:X11", "system:Xi", "system:Xcursor", "system:GL", "system:dl", "system:pthread" } }
+            else       { foreign import sokol_app_clib { "sokol_app_linux_x64_gl_release.a", "system:X11", "system:Xi", "system:Xcursor", "system:GL", "system:dl", "system:pthread" } }
+        }
     }
 } else when ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 {
     // Feed sokol_app_wasm_gl_debug.a or sokol_app_wasm_gl_release.a into emscripten compiler.

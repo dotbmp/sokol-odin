@@ -48,4 +48,42 @@ build_lib_x64_debug sokol_debugtext     debugtext/sokol_debugtext_linux_x64_gl_d
 build_lib_x64_debug sokol_shape         shape/sokol_shape_linux_x64_gl_debug SOKOL_GLCORE
 build_lib_x64_debug sokol_gl            gl/sokol_gl_linux_x64_gl_debug SOKOL_GLCORE
 
+# Vulkan backend (opt-in: requires the Vulkan SDK headers).
+# Skipped silently when <vulkan/vulkan.h> isn't on the include path so users
+# without the SDK installed still get a clean GL-only build.
+have_vulkan=0
+if echo '#include <vulkan/vulkan.h>' | cc -E -x c - >/dev/null 2>&1; then
+    have_vulkan=1
+fi
+
+if [ $have_vulkan -eq 1 ]; then
+    echo "=== Vulkan SDK headers detected — building Vulkan backend ==="
+
+    # x64 + Vulkan + Release
+    build_lib_x64_release sokol_log         log/sokol_log_linux_x64_vulkan_release SOKOL_VULKAN
+    build_lib_x64_release sokol_gfx         gfx/sokol_gfx_linux_x64_vulkan_release SOKOL_VULKAN
+    build_lib_x64_release sokol_app         app/sokol_app_linux_x64_vulkan_release SOKOL_VULKAN
+    build_lib_x64_release sokol_glue        glue/sokol_glue_linux_x64_vulkan_release SOKOL_VULKAN
+    build_lib_x64_release sokol_time        time/sokol_time_linux_x64_vulkan_release SOKOL_VULKAN
+    build_lib_x64_release sokol_audio       audio/sokol_audio_linux_x64_vulkan_release SOKOL_VULKAN "-lasound"
+    build_lib_x64_release sokol_debugtext   debugtext/sokol_debugtext_linux_x64_vulkan_release SOKOL_VULKAN
+    build_lib_x64_release sokol_shape       shape/sokol_shape_linux_x64_vulkan_release SOKOL_VULKAN
+    build_lib_x64_release sokol_gl          gl/sokol_gl_linux_x64_vulkan_release SOKOL_VULKAN
+
+    # x64 + Vulkan + Debug
+    build_lib_x64_debug sokol_log           log/sokol_log_linux_x64_vulkan_debug SOKOL_VULKAN
+    build_lib_x64_debug sokol_gfx           gfx/sokol_gfx_linux_x64_vulkan_debug SOKOL_VULKAN
+    build_lib_x64_debug sokol_app           app/sokol_app_linux_x64_vulkan_debug SOKOL_VULKAN
+    build_lib_x64_debug sokol_glue          glue/sokol_glue_linux_x64_vulkan_debug SOKOL_VULKAN
+    build_lib_x64_debug sokol_time          time/sokol_time_linux_x64_vulkan_debug SOKOL_VULKAN
+    build_lib_x64_debug sokol_audio         audio/sokol_audio_linux_x64_vulkan_debug SOKOL_VULKAN "-lasound"
+    build_lib_x64_debug sokol_debugtext     debugtext/sokol_debugtext_linux_x64_vulkan_debug SOKOL_VULKAN
+    build_lib_x64_debug sokol_shape         shape/sokol_shape_linux_x64_vulkan_debug SOKOL_VULKAN
+    build_lib_x64_debug sokol_gl            gl/sokol_gl_linux_x64_vulkan_debug SOKOL_VULKAN
+else
+    echo "=== Vulkan SDK headers not found (skipping Vulkan backend) ==="
+    echo "=== Install vulkan-headers (Arch), libvulkan-dev (Debian),"
+    echo "=== or vulkan-devel (Fedora) to enable the Vulkan build."
+fi
+
 rm *.o

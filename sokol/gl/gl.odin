@@ -707,6 +707,7 @@ SOKOL_DEBUG :: #config(SOKOL_DEBUG, ODIN_DEBUG)
 DEBUG :: #config(SOKOL_GL_DEBUG, SOKOL_DEBUG)
 USE_GL :: #config(SOKOL_USE_GL, false)
 USE_DLL :: #config(SOKOL_DLL, false)
+USE_VULKAN :: #config(SOKOL_USE_VULKAN, false)  // Linux only
 
 when ODIN_OS == .Windows {
     when USE_DLL {
@@ -756,12 +757,22 @@ when ODIN_OS == .Windows {
         }
     }
 } else when ODIN_OS == .Linux {
-    when USE_DLL {
-        when DEBUG { foreign import sokol_gl_clib { "sokol_gl_linux_x64_gl_debug.so" } }
-        else       { foreign import sokol_gl_clib { "sokol_gl_linux_x64_gl_release.so" } }
+    when USE_VULKAN {
+        when USE_DLL {
+            when DEBUG { foreign import sokol_gl_clib { "sokol_gl_linux_x64_vulkan_debug.so" } }
+            else       { foreign import sokol_gl_clib { "sokol_gl_linux_x64_vulkan_release.so" } }
+        } else {
+            when DEBUG { foreign import sokol_gl_clib { "sokol_gl_linux_x64_vulkan_debug.a" } }
+            else       { foreign import sokol_gl_clib { "sokol_gl_linux_x64_vulkan_release.a" } }
+        }
     } else {
-        when DEBUG { foreign import sokol_gl_clib { "sokol_gl_linux_x64_gl_debug.a" } }
-        else       { foreign import sokol_gl_clib { "sokol_gl_linux_x64_gl_release.a" } }
+        when USE_DLL {
+            when DEBUG { foreign import sokol_gl_clib { "sokol_gl_linux_x64_gl_debug.so" } }
+            else       { foreign import sokol_gl_clib { "sokol_gl_linux_x64_gl_release.so" } }
+        } else {
+            when DEBUG { foreign import sokol_gl_clib { "sokol_gl_linux_x64_gl_debug.a" } }
+            else       { foreign import sokol_gl_clib { "sokol_gl_linux_x64_gl_release.a" } }
+        }
     }
 } else when ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 {
     // Feed sokol_gl_wasm_gl_debug.a or sokol_gl_wasm_gl_release.a into emscripten compiler.
